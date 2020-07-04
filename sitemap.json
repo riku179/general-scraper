@@ -1,0 +1,40 @@
+{
+  "_id": "formula1-dataq",
+  "startUrl": [
+    "https://formula1-data.com/article"
+  ],
+  "selectors": [
+    {
+      "id": "link",
+      "type": "SelectorLink",
+      "parentSelectors": [
+        "_root"
+      ],
+      "selector": ".mdlGrid__col12 a",
+      "multiple": true,
+      "delay": 0
+    },
+    {
+      "id": "title",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "link"
+      ],
+      "selector": "h1.entryHeader__title",
+      "multiple": false,
+      "regex": "",
+      "delay": 0
+    },
+    {
+      "id": "content",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "link"
+      ],
+      "selector": ".entry > p",
+      "multiple": true,
+      "regex": "",
+      "delay": 0
+    }
+  ]
+}

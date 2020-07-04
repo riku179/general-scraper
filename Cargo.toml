@@ -1,0 +1,14 @@
+[package]
+name = "scraper"
+version = "0.1.0"
+authors = ["Riku Inoue <gety0urpingdrum@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+scraper = "0.12.0"
+reqwest = { version = "0.10", features = ["gzip", "brotli"] }
+tokio = { version = "0.2", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
