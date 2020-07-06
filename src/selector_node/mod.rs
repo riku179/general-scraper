@@ -4,7 +4,7 @@ mod test;
 use serde::Deserialize;
 use serde_json;
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct SelectorNode {
     pub id: String,
     pub selector_type: SelectorType,
@@ -14,7 +14,7 @@ pub struct SelectorNode {
 }
 
 impl SelectorNode {
-    fn new(mut sitemap: SiteMap) -> Vec<Self> {
+    pub fn new(mut sitemap: SiteMap) -> Vec<Self> {
         build_selector_node(&mut sitemap.selectors, &"_root".to_string())
     }
 
@@ -46,7 +46,7 @@ fn build_selector_node(raw_selectors: &Vec<RawSelector>, parent_id: &String) -> 
     children_selectors
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum SelectorType {
     Text,
     Link,
@@ -73,7 +73,7 @@ pub struct SiteMap {
 }
 
 impl SiteMap {
-    fn new(str: String) -> Result<Self, serde_json::Error> {
+    pub fn new(str: String) -> Result<Self, serde_json::Error> {
         serde_json::from_str(&str)
     }
 }

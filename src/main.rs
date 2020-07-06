@@ -1,30 +1,42 @@
-mod selector_tree;
-
-use reqwest;
-use scraper::{Html, Selector};
+mod executor;
+mod selector_node;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let url = "https://formula1-data.com/article".to_string();
-    let selector = ".mdlGrid__col12 a".to_string();
-
-    for url in get_urls(&url, &selector).await? {
-        println!("url: {}", url)
+    let sitemap_json = r###"
+{
+  "_id": "formula1-data",
+  "startUrl": [
+    "https://formula1-data.com/article"
+  ],
+  "selectors": [
+    {
+      "id": "link",
+      "type": "SelectorLink",
+      "parentSelectors": [
+        "_root"
+      ],
+      "selector": ".mdlGrid__col12 a",
+      "multiple": true,
+      "delay": 0
+    },
+    {
+      "id": "title",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "link"
+      ],
+      "selector": "h1.entryHeader__title",
+      "multiple": false,
+      "regex": "",
+      "delay": 0
     }
-    Ok(())
+  ]
 }
+    "###;
+    let sitemap = selector_node::SiteMap::new(sitemap_json.to_string()).unwrap();
+    let selectors = selector_node::SelectorNode::new(sitemap);
 
-async fn get_urls(
-    url: &String,
-    selector: &String,
-) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let body = reqwest::get(url).await?.text().await?;
-
-    let document = Html::parse_document(&body);
-    let selector = Selector::parse(selector).unwrap();
-
-    Ok(document
-        .select(&selector)
-        .map(|element| element.value().attr("href").unwrap().to_string())
-        .collect())
+    executor::execute(&selectors, url).await
 }

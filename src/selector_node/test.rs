@@ -1,4 +1,4 @@
-use crate::selector_tree::{SelectorNode, SelectorType, SiteMap};
+use crate::selector_node::{SelectorNode, SelectorType, SiteMap};
 
 #[test]
 fn test_selector_tree_new() {
