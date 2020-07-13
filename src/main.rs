@@ -35,8 +35,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   ]
 }
     "###;
-    let sitemap = selector_node::SiteMap::new(sitemap_json.to_string()).unwrap();
+    let sitemap = selector_node::SiteMap::new(sitemap_json.to_string())?;
     let selectors = selector_node::SelectorNode::new(sitemap);
 
-    executor::execute(&selectors, url).await
+    let result = executor::execute(&selectors, &url).await?;
+
+    let json = serde_json::to_string(&result)?;
+    println!("{}", json);
+
+    Ok(())
 }
