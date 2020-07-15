@@ -1,8 +1,8 @@
 use crate::selector_node::SelectorTree;
 use serde_json;
 
-mod formatter;
 mod executor;
+mod formatter;
 mod selector_node;
 
 #[tokio::main]

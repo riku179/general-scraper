@@ -7,14 +7,14 @@ use serde_json;
 #[derive(Clone, PartialEq, Debug)]
 pub struct SelectorTree {
     pub start_url: String,
-    pub selectors: Vec<SelectorNode>
+    pub selectors: Vec<SelectorNode>,
 }
 
 impl SelectorTree {
     pub fn new(start_url: String, json: String) -> Result<Self, serde_json::Error> {
         Ok(SelectorTree {
             start_url,
-            selectors: SelectorNode::new(SiteMap::new(json)?)
+            selectors: SelectorNode::new(SiteMap::new(json)?),
         })
     }
 }

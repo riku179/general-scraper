@@ -1,4 +1,4 @@
-use crate::selector_node::{SelectorTree, SelectorNode, SelectorType};
+use crate::selector_node::{SelectorNode, SelectorTree, SelectorType};
 use reqwest;
 use reqwest::Url;
 use scraper::{Html, Selector};
@@ -6,13 +6,15 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 
-pub async fn crawl(selector_tree: &SelectorTree) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
+pub async fn crawl(
+    selector_tree: &SelectorTree,
+) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
     let doc = fetch(&selector_tree.start_url).await?;
 
     Ok(vec![Artifact {
         tag: "source_url".to_string(),
         data: Rc::new(selector_tree.start_url.clone()),
-        children: track_nodes(&selector_tree.selectors, &doc).await?
+        children: track_nodes(&selector_tree.selectors, &doc).await?,
     }])
 }
 
@@ -23,16 +25,14 @@ pub struct Artifact {
     pub children: Vec<Artifact>,
 }
 
-async fn fetch(
-    url: &String,
-) -> Result<Html, Box<dyn std::error::Error>> {
+async fn fetch(url: &String) -> Result<Html, Box<dyn std::error::Error>> {
     let body = reqwest::get(Url::parse(url)?).await?.text().await?;
     Ok(Html::parse_document(&body))
 }
 
 async fn track_nodes(
     nodes: &Vec<SelectorNode>, // title, body
-    doc: &Html // contents page
+    doc: &Html,                // contents page
 ) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
     let mut artifacts: Vec<Artifact> = vec![];
     for node in nodes {
@@ -73,7 +73,6 @@ async fn track_link_node(
         urls: Vec<Rc<String>>,
     ) -> Pin<Box<dyn Future<Output = Result<Vec<Artifact>, Box<dyn std::error::Error>>>>> {
         Box::pin(async move {
-
             let mut artifacts: Vec<Artifact> = vec![];
             for url in urls {
                 let doc = fetch(&url).await?;
