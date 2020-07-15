@@ -10,5 +10,5 @@ edition = "2018"
 scraper = "0.12.0"
 reqwest = { version = "0.10", features = ["gzip", "brotli"] }
 tokio = { version = "0.2", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = "1.0"

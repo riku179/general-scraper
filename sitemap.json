@@ -26,13 +26,13 @@
       "delay": 0
     },
     {
-      "id": "content",
+      "id": "pub_date",
       "type": "SelectorText",
       "parentSelectors": [
         "link"
       ],
-      "selector": ".entry > p",
-      "multiple": true,
+      "selector": "li time",
+      "multiple": false,
       "regex": "",
       "delay": 0
     }

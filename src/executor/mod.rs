@@ -1,54 +1,57 @@
-use crate::selector_node::{SelectorNode, SelectorType};
+use crate::selector_node::{SelectorTree, SelectorNode, SelectorType};
 use reqwest;
+use reqwest::Url;
 use scraper::{Html, Selector};
-use serde::Serialize;
 use std::future::Future;
 use std::pin::Pin;
+use std::rc::Rc;
 
-#[derive(Debug, Serialize)]
-pub struct Artifact {
-    tag: String,
-    data: String,
-    children: Vec<Artifact>,
+pub async fn crawl(selector_tree: &SelectorTree) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
+    let doc = fetch(&selector_tree.start_url).await?;
+
+    Ok(vec![Artifact {
+        tag: "source_url".to_string(),
+        data: Rc::new(selector_tree.start_url.clone()),
+        children: track_nodes(&selector_tree.selectors, &doc).await?
+    }])
 }
 
-pub async fn execute(
-    nodes: &Vec<SelectorNode>,
-    url: &String,
-) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
-    let body = reqwest::get(url).await?.text().await?;
-    let doc = Html::parse_document(&body);
+#[derive(Debug)]
+pub struct Artifact {
+    pub tag: String,
+    pub data: Rc<String>,
+    pub children: Vec<Artifact>,
+}
 
-    track_nodes(nodes, url, doc).await
+async fn fetch(
+    url: &String,
+) -> Result<Html, Box<dyn std::error::Error>> {
+    let body = reqwest::get(Url::parse(url)?).await?.text().await?;
+    Ok(Html::parse_document(&body))
 }
 
 async fn track_nodes(
-    nodes: &Vec<SelectorNode>,
-    url: &String,
-    doc: Html,
+    nodes: &Vec<SelectorNode>, // title, body
+    doc: &Html // contents page
 ) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
     let mut artifacts: Vec<Artifact> = vec![];
     for node in nodes {
-        let artifact = match node.selector_type {
+        match node.selector_type {
             SelectorType::Link => {
-                let artifacts = track_link_node(&node, &doc).await?;
-                Artifact {
-                    tag: node.id.clone(),
-                    data: url.clone(),
-                    children: artifacts,
-                }
+                let mut children = track_link_node(&node, &doc).await?;
+                // [link[title, body], link[title, body], link[title, body] ...]
+                artifacts.append(&mut children);
             }
             SelectorType::Text => {
                 let data = track_text_node(&node, &doc).await?;
-                Artifact {
+                artifacts.push(Artifact {
                     tag: node.id.clone(),
-                    data,
+                    data: Rc::new(data),
                     children: vec![],
-                }
+                })
             }
             _ => panic!(),
         };
-        artifacts.push(artifact);
     }
 
     Ok(artifacts)
@@ -59,23 +62,25 @@ async fn track_link_node(
     doc: &Html,
 ) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
     let selector = Selector::parse(&node.selector).unwrap();
-    let urls: Vec<String> = doc
+    let urls: Vec<Rc<String>> = doc
         .select(&selector)
-        .map(|element| element.value().attr("href").unwrap().to_string())
+        .map(|element| Rc::new(element.value().attr("href").unwrap().to_string()))
         .collect();
 
     // helper for recursive async function. ref here: https://doc.rust-lang.org/error-index.html#E0733
     fn execute_urls(
         node: SelectorNode,
-        urls: Vec<String>,
+        urls: Vec<Rc<String>>,
     ) -> Pin<Box<dyn Future<Output = Result<Vec<Artifact>, Box<dyn std::error::Error>>>>> {
         Box::pin(async move {
+
             let mut artifacts: Vec<Artifact> = vec![];
             for url in urls {
-                let children = execute(&node.children, &url).await?;
+                let doc = fetch(&url).await?;
+                let children = track_nodes(&node.children, &doc).await?;
                 artifacts.push(Artifact {
                     tag: node.id.clone(),
-                    data: url,
+                    data: Rc::clone(&url),
                     children,
                 });
             }
@@ -83,6 +88,7 @@ async fn track_link_node(
         })
     }
 
+    // TODO: use Arc<T> to 'SelectorNode'
     execute_urls(node.clone(), urls).await
 }
 

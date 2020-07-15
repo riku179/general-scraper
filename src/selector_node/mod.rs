@@ -5,6 +5,21 @@ use serde::Deserialize;
 use serde_json;
 
 #[derive(Clone, PartialEq, Debug)]
+pub struct SelectorTree {
+    pub start_url: String,
+    pub selectors: Vec<SelectorNode>
+}
+
+impl SelectorTree {
+    pub fn new(start_url: String, json: String) -> Result<Self, serde_json::Error> {
+        Ok(SelectorTree {
+            start_url,
+            selectors: SelectorNode::new(SiteMap::new(json)?)
+        })
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
 pub struct SelectorNode {
     pub id: String,
     pub selector_type: SelectorType,
@@ -14,7 +29,7 @@ pub struct SelectorNode {
 }
 
 impl SelectorNode {
-    pub fn new(mut sitemap: SiteMap) -> Vec<Self> {
+    fn new(mut sitemap: SiteMap) -> Vec<Self> {
         build_selector_node(&mut sitemap.selectors, &"_root".to_string())
     }
 
@@ -65,7 +80,7 @@ impl SelectorType {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct SiteMap {
+struct SiteMap {
     _id: String,
     #[serde(rename(deserialize = "startUrl"))]
     start_url: Vec<String>,
@@ -73,8 +88,8 @@ pub struct SiteMap {
 }
 
 impl SiteMap {
-    pub fn new(str: String) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(&str)
+    fn new(json: String) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(&json)
     }
 }
 

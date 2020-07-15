@@ -1,3 +1,7 @@
+use crate::selector_node::SelectorTree;
+use serde_json;
+
+mod formatter;
 mod executor;
 mod selector_node;
 
@@ -6,7 +10,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let url = "https://formula1-data.com/article".to_string();
     let sitemap_json = r###"
 {
-  "_id": "formula1-data",
+  "_id": "formula1-dataq",
   "startUrl": [
     "https://formula1-data.com/article"
   ],
@@ -31,17 +35,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       "multiple": false,
       "regex": "",
       "delay": 0
+    },
+    {
+      "id": "pub_date",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "link"
+      ],
+      "selector": "li time",
+      "multiple": false,
+      "regex": "",
+      "delay": 0
     }
   ]
 }
     "###;
-    let sitemap = selector_node::SiteMap::new(sitemap_json.to_string())?;
-    let selectors = selector_node::SelectorNode::new(sitemap);
+    let selector = SelectorTree::new(url, sitemap_json.to_string())?;
 
-    let result = executor::execute(&selectors, &url).await?;
+    let artifacts = executor::crawl(&selector).await?;
+    // println!("{:?}", &artifacts);
 
-    let json = serde_json::to_string(&result)?;
-    println!("{}", json);
+    let formatted = formatter::format(artifacts);
+
+    println!("{}", serde_json::to_string_pretty(&formatted)?);
 
     Ok(())
 }

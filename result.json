@@ -1,195 +1,104 @@
 [
   {
-    "tag": "link",
-    "data": "https://formula1-data.com/article",
-    "children": [
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/racing-point-slams-renault-confident-in-rp20",
-        "children": [
-          {
-            "tag": "title",
-            "data": "レーシングポイントF1、ルノーを非難…RP20の合法性に自信",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-fastest-award-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "F1シュタイアーマルクGP最速賞︰支配的なレッドブル・ホンダとカルロス・サインツ",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/indycar-round4-race-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "インディカー第4戦ロードアメリカ決勝：ローゼンクビスト初優勝！佐藤琢磨 上向きの8位「理想的ではないが悪くはない」",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-day3-redbull-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "レッドブル・ホンダ「速さ、戦略の両面でメルセデスの後手に回った」",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-day3-albon-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "アレックス・アルボン「改善すべき点でフェルスタッペンと同意見」",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/fia-seized-parts-from-racing-point-rp20",
-        "children": [
-          {
-            "tag": "title",
-            "data": "FIA、論争の的「レーシングポイントRP20」のパーツを押収…ルノーの抗議を受理し調査に着手",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-day3-alphatauri-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "アルファタウリ・ホンダ、”残念”な10位入賞「もっと多くを期待していた」",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-day3-verstappen-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "メルセデスに完敗、とフェルスタッペン「優勝を狙うには単純に遅すぎた」",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/renault-f1-formally-protests-over-racing-points-f1-car",
-        "children": [
-          {
-            "tag": "title",
-            "data": "ルノーF1、メルセデスに類似のレーシングポイントF1マシン「RP20」を巡り正式抗議",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-day3-honda-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "ホンダF1、表彰台含め3台が入賞「大きな問題発生せず」と田辺TD",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-race-movie-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "ハイライト動画︰F1シュタイアーマルクGP決勝、センセーショナルな跳馬同士討ちと白熱の中団バトル",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/leclerc-apologizes-for-crash-with-vettel-at-steiermark",
-        "children": [
-          {
-            "tag": "title",
-            "data": "フェラーリ︰ルクレール、ベッテルとの同士討ちを謝罪「申し訳ないで済む話じゃない」",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-race-digest-2020",
-        "children": [
-          {
-            "tag": "title",
-            "data": "跳馬同士討ち…メルセデスはレースを支配、ホンダ勢は3-4-10 / F1シュタイアーマルクGP《決勝》結果とダイジェスト",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/steiermark-race-digest-2020-sokuho1",
-        "children": [
-          {
-            "tag": "title",
-            "data": "F1速報︰1周目にフェラーリが同士討ち！早々にダブルリタイヤの波乱 / F1シュタイアーマルクGP決勝",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/haas-f1-parc-ferme-violation-steiermark",
-        "children": [
-          {
-            "tag": "title",
-            "data": "ハースF1、パルクフェルメ違反…グロージャンにピットスタート命令 / F1シュタイアーマルクGP",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/mercedes-to-avoid-the-curb-at-steiermark",
-        "children": [
-          {
-            "tag": "title",
-            "data": "メルセデス、ギアボックスの懸念払拭できず…縁石避け走行へ / F1シュタイアーマルクGP",
-            "children": []
-          }
-        ]
-      },
-      {
-        "tag": "link",
-        "data": "https://formula1-data.com/article/giovinazzi-five-grid-positions-after-changing-gearbox-steiermark",
-        "children": [
-          {
-            "tag": "title",
-            "data": "アントニオ・ジョビナッツィ、ギアボックス交換で5グリッド降格 / F1シュタイアーマルクGP",
-            "children": []
-          }
-        ]
-      }
-    ]
+    "source_url": "https://formula1-data.com/article",
+    "title": "ガスリー「アルファタウリ・ホンダ的にはハンガロリンクの方が合っているはず」",
+    "pub_date": "2020/7/15 21:15",
+    "link": "https://formula1-data.com/article/hungary-preview-gasly-2020"
+  },
+  {
+    "title": "フェルスタッペン、昨年の雪辱果たせるか？「ハンガロリンクではセットアップが重要」",
+    "link": "https://formula1-data.com/article/hungary-preview-verstappen-2020",
+    "pub_date": "2020/7/15 07:34",
+    "source_url": "https://formula1-data.com/article"
+  },
+  {
+    "source_url": "https://formula1-data.com/article",
+    "pub_date": "2020/7/15 06:26",
+    "title": "セバスチャン・ベッテル、レーシングポイントF1との移籍交渉を開始…独紙報道",
+    "link": "https://formula1-data.com/article/vettel-begins-transfer-talks-with-racing-point-f1"
+  },
+  {
+    "source_url": "https://formula1-data.com/article",
+    "pub_date": "2020/7/14 21:41",
+    "link": "https://formula1-data.com/article/ferrari-f1-receives-heavy-criticism-from-italy",
+    "title": "弱り目に祟り目のフェラーリF1、母国イタリアから酷評の嵐「バーチャルレースのつもりか？」"
+  },
+  {
+    "link": "https://formula1-data.com/article/three-reasons-why-red-bull-lost-to-mercedes-at-steiermark",
+    "source_url": "https://formula1-data.com/article",
+    "title": "台本・ERS・カルチャー…勝ち目はなかった？レッドブル・ホンダ対メルセデス、完敗した3つの理由",
+    "pub_date": "2020/7/14 11:50"
+  },
+  {
+    "link": "https://formula1-data.com/article/racing-point-slams-renault-confident-in-rp20",
+    "pub_date": "2020/7/13 21:45 2020/7/15 07:37",
+    "title": "レーシングポイントF1、ルノーを非難…RP20の合法性に自信",
+    "source_url": "https://formula1-data.com/article"
+  },
+  {
+    "link": "https://formula1-data.com/article/steiermark-fastest-award-2020",
+    "title": "F1シュタイアーマルクGP最速賞︰支配的なレッドブル・ホンダとカルロス・サインツ",
+    "pub_date": "2020/7/13 19:20",
+    "source_url": "https://formula1-data.com/article"
+  },
+  {
+    "source_url": "https://formula1-data.com/article",
+    "pub_date": "2020/7/13 09:37",
+    "title": "インディカー第4戦ロードアメリカ決勝：ローゼンクビスト初優勝！佐藤琢磨 上向きの8位「理想的ではないが悪くはない」",
+    "link": "https://formula1-data.com/article/indycar-round4-race-2020"
+  },
+  {
+    "source_url": "https://formula1-data.com/article",
+    "pub_date": "2020/7/13 08:23",
+    "link": "https://formula1-data.com/article/steiermark-day3-redbull-2020",
+    "title": "レッドブル・ホンダ「速さ、戦略の両面でメルセデスの後手に回った」"
+  },
+  {
+    "pub_date": "2020/7/13 07:15",
+    "source_url": "https://formula1-data.com/article",
+    "title": "アレックス・アルボン「改善すべき点でフェルスタッペンと同意見」",
+    "link": "https://formula1-data.com/article/steiermark-day3-albon-2020"
+  },
+  {
+    "title": "FIA、論争の的「レーシングポイントRP20」のパーツを押収…ルノーの抗議を受理し調査に着手",
+    "source_url": "https://formula1-data.com/article",
+    "link": "https://formula1-data.com/article/fia-seized-parts-from-racing-point-rp20",
+    "pub_date": "2020/7/13 06:40"
+  },
+  {
+    "title": "アルファタウリ・ホンダ、”残念”な10位入賞「もっと多くを期待していた」",
+    "source_url": "https://formula1-data.com/article",
+    "link": "https://formula1-data.com/article/steiermark-day3-alphatauri-2020",
+    "pub_date": "2020/7/13 06:26"
+  },
+  {
+    "link": "https://formula1-data.com/article/steiermark-day3-verstappen-2020",
+    "pub_date": "2020/7/13 05:05",
+    "source_url": "https://formula1-data.com/article",
+    "title": "メルセデスに完敗、とフェルスタッペン「優勝を狙うには単純に遅すぎた」"
+  },
+  {
+    "title": "ルノーF1、メルセデスに類似のレーシングポイントF1マシン「RP20」を巡り正式抗議",
+    "source_url": "https://formula1-data.com/article",
+    "link": "https://formula1-data.com/article/renault-f1-formally-protests-over-racing-points-f1-car",
+    "pub_date": "2020/7/13 02:47"
+  },
+  {
+    "pub_date": "2020/7/13 02:23",
+    "link": "https://formula1-data.com/article/steiermark-day3-honda-2020",
+    "source_url": "https://formula1-data.com/article",
+    "title": "ホンダF1、表彰台含め3台が入賞「大きな問題発生せず」と田辺TD"
+  },
+  {
+    "title": "ハイライト動画︰F1シュタイアーマルクGP決勝、センセーショナルな跳馬同士討ちと白熱の中団バトル",
+    "pub_date": "2020/7/13 01:20",
+    "link": "https://formula1-data.com/article/steiermark-race-movie-2020",
+    "source_url": "https://formula1-data.com/article"
+  },
+  {
+    "pub_date": "2020/7/13 00:58",
+    "link": "https://formula1-data.com/article/leclerc-apologizes-for-crash-with-vettel-at-steiermark",
+    "title": "フェラーリ︰ルクレール、ベッテルとの同士討ちを謝罪「申し訳ないで済む話じゃない」",
+    "source_url": "https://formula1-data.com/article"
   }
 ]
