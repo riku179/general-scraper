@@ -11,10 +11,11 @@ pub struct SelectorTree {
 }
 
 impl SelectorTree {
-    pub fn new(start_url: String, json: String) -> Result<Self, serde_json::Error> {
+    pub fn new(json: String) -> Result<Self, serde_json::Error> {
+        let sitemap = SiteMap::new(json)?;
         Ok(SelectorTree {
-            start_url,
-            selectors: SelectorNode::new(SiteMap::new(json)?),
+            start_url: sitemap.start_url[0].clone(),
+            selectors: SelectorNode::new(sitemap),
         })
     }
 }

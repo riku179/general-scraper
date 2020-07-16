@@ -1,5 +1,10 @@
 use crate::selector_node::SelectorTree;
 use serde_json;
+use std::env;
+use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 
 mod executor;
 mod formatter;
@@ -7,57 +12,23 @@ mod selector_node;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let url = "https://formula1-data.com/article".to_string();
-    let sitemap_json = r###"
-{
-  "_id": "formula1-dataq",
-  "startUrl": [
-    "https://formula1-data.com/article"
-  ],
-  "selectors": [
-    {
-      "id": "link",
-      "type": "SelectorLink",
-      "parentSelectors": [
-        "_root"
-      ],
-      "selector": ".mdlGrid__col12 a",
-      "multiple": true,
-      "delay": 0
-    },
-    {
-      "id": "title",
-      "type": "SelectorText",
-      "parentSelectors": [
-        "link"
-      ],
-      "selector": "h1.entryHeader__title",
-      "multiple": false,
-      "regex": "",
-      "delay": 0
-    },
-    {
-      "id": "pub_date",
-      "type": "SelectorText",
-      "parentSelectors": [
-        "link"
-      ],
-      "selector": "li time",
-      "multiple": false,
-      "regex": "",
-      "delay": 0
-    }
-  ]
-}
-    "###;
-    let selector = SelectorTree::new(url, sitemap_json.to_string())?;
+    let default_input_filename = "input.json".to_string();
+    let default_output_filename = "output.json".to_string();
+    let args: Vec<String> = env::args().collect();
+    let input_filename = args.get(1).unwrap_or(&default_input_filename);
+    let output_filename = args.get(2).unwrap_or(&default_output_filename);
+
+    let mut output_file = File::create(Path::new(output_filename))?;
+
+    let sitemap = fs::read_to_string(input_filename)?;
+
+    let selector = SelectorTree::new(sitemap)?;
 
     let artifacts = executor::crawl(&selector).await?;
-    // println!("{:?}", &artifacts);
 
     let formatted = formatter::format(artifacts);
 
-    println!("{}", serde_json::to_string_pretty(&formatted)?);
+    output_file.write_all(serde_json::to_string_pretty(&formatted)?.as_bytes())?;
 
     Ok(())
 }
