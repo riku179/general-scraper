@@ -24,7 +24,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let selector = SelectorTree::new(sitemap)?;
 
-    let artifacts = executor::crawl(&selector).await?;
+    let executor = executor::Executor::new(executor::WebFetcher());
+    let artifacts = executor.crawl(&selector).await?;
 
     let formatted = formatter::format(artifacts);
 
