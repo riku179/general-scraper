@@ -1,4 +1,8 @@
+#[cfg(test)]
+mod test;
+
 use crate::selector_node::{SelectorNode, SelectorTree, SelectorType};
+use anyhow::Result;
 use async_trait::async_trait;
 use reqwest;
 use reqwest::Url;
@@ -10,20 +14,20 @@ use std::sync::Arc;
 
 #[async_trait]
 pub trait Fetcher {
-    async fn fetch(&self, url: &String) -> Result<Html, Box<dyn std::error::Error>>;
+    async fn fetch(&self, url: &String) -> Result<Html>;
 }
 
 pub struct WebFetcher();
 
 #[async_trait]
 impl Fetcher for WebFetcher {
-    async fn fetch(&self, url: &String) -> Result<Html, Box<dyn std::error::Error>> {
+    async fn fetch(&self, url: &String) -> Result<Html> {
         let body = reqwest::get(Url::parse(url)?).await?.text().await?;
         Ok(Html::parse_document(&body))
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Artifact {
     pub tag: String,
     pub data: Rc<String>,
@@ -43,10 +47,7 @@ impl<F: Fetcher> Executor<F> {
 }
 
 impl<F: 'static + Fetcher> Executor<F> {
-    pub async fn crawl(
-        &self,
-        selector_tree: &SelectorTree,
-    ) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
+    pub async fn crawl(&self, selector_tree: &SelectorTree) -> Result<Vec<Artifact>> {
         let doc = self.fetcher.fetch(&selector_tree.start_url).await?;
 
         Ok(vec![Artifact {
@@ -61,7 +62,7 @@ impl<F: 'static + Fetcher> Executor<F> {
         fetcher: Arc<F>,
         nodes: &Vec<SelectorNode>, // title, body
         doc: &Html,                // contents page
-    ) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<Artifact>> {
         let mut artifacts: Vec<Artifact> = vec![];
         for node in nodes {
             match node.selector_type {
@@ -90,7 +91,7 @@ impl<F: 'static + Fetcher> Executor<F> {
         fetcher: Arc<F>,
         node: &SelectorNode,
         doc: &Html,
-    ) -> Result<Vec<Artifact>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<Artifact>> {
         let selector = Selector::parse(&node.selector).unwrap();
         let urls: Vec<Rc<String>> = doc
             .select(&selector)
@@ -106,7 +107,7 @@ impl<F: 'static + Fetcher> Executor<F> {
         fetcher: Arc<F>,
         node: SelectorNode,
         urls: Vec<Rc<String>>,
-    ) -> Pin<Box<dyn Future<Output = Result<Vec<Artifact>, Box<dyn std::error::Error>>>>> {
+    ) -> Pin<Box<dyn Future<Output = Result<Vec<Artifact>>>>> {
         Box::pin(async move {
             let mut artifacts: Vec<Artifact> = vec![];
             for url in urls {
@@ -123,10 +124,7 @@ impl<F: 'static + Fetcher> Executor<F> {
         })
     }
 
-    async fn track_text_node(
-        node: &SelectorNode,
-        doc: &Html,
-    ) -> Result<String, Box<dyn std::error::Error>> {
+    async fn track_text_node(node: &SelectorNode, doc: &Html) -> Result<String> {
         let selector = Selector::parse(&node.selector).unwrap();
 
         let text: String = doc

@@ -1,5 +1,5 @@
 [package]
-name = "scraper"
+name = "general-scraper"
 version = "0.1.0"
 authors = ["Riku Inoue <gety0urpingdrum@gmail.com>"]
 edition = "2018"
@@ -13,3 +13,4 @@ tokio = { version = "0.2", features = ["full"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = "1.0"
 async-trait = "0.1.36"
+anyhow = "1.0.31"

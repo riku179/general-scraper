@@ -1,6 +1,7 @@
 use crate::selector_node::SelectorTree;
 use serde_json;
 use std::env;
+use std::error;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -11,7 +12,7 @@ mod formatter;
 mod selector_node;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn error::Error>> {
     let default_input_filename = "input.json".to_string();
     let default_output_filename = "output.json".to_string();
     let args: Vec<String> = env::args().collect();
