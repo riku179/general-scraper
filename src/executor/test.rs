@@ -1,4 +1,4 @@
-use crate::executor::{Artifact, Executor, Fetcher};
+use crate::executor::{Artifact, Executor, FetchClient, FetchParam};
 use crate::selector_node::SelectorTree;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
@@ -25,12 +25,13 @@ impl MockedFetcher {
 }
 
 #[async_trait]
-impl Fetcher for MockedFetcher {
-    async fn fetch(&self, url: &String) -> Result<Html> {
-        self.mapping
-            .get(url)
-            .map(|html| Html::parse_fragment(html))
-            .ok_or(anyhow!("html not found by the url: {}", &url))
+impl FetchClient for MockedFetcher {
+    async fn fetch(&self, url: &String, _param: FetchParam) -> Result<Option<Html>> {
+        if let Some(content) = self.mapping.get(url) {
+            Ok(Some(Html::parse_fragment(content)))
+        } else {
+            Err(anyhow!("html not found by the url: {}", &url))
+        }
     }
 }
 
@@ -108,6 +109,7 @@ async fn fetcher_crawler_test() {
 }
     "###
         .to_string(),
+        HashMap::new(),
         vec![Artifact {
             tag: "source_url".to_string(),
             data: Rc::new("http://url-root.com/article".to_string()),
@@ -148,11 +150,11 @@ async fn fetcher_crawler_test() {
         }],
     )];
 
-    for (url_map, selector_json, expected) in test_data {
+    for (url_map, selector_json, access_log, expected) in test_data {
         let mocked_fetcher = MockedFetcher::new(url_map);
-        let executor = Executor::new(mocked_fetcher);
+        let executor = Executor::new(mocked_fetcher, access_log);
         let selector = SelectorTree::new(selector_json).unwrap();
-        let actual = executor.crawl(&selector).await.unwrap();
+        let (actual, _) = executor.crawl(&selector).await.unwrap();
 
         assert_eq!(expected, actual)
     }

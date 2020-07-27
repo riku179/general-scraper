@@ -1,5 +1,6 @@
 use crate::selector_node::SelectorTree;
 use serde_json;
+use std::collections::HashMap;
 use std::env;
 use std::error;
 use std::fs;
@@ -25,8 +26,8 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
     let selector = SelectorTree::new(sitemap)?;
 
-    let executor = executor::Executor::new(executor::WebFetcher());
-    let artifacts = executor.crawl(&selector).await?;
+    let executor = executor::Executor::new(executor::WebFetcher::new(), HashMap::new());
+    let (artifacts, _) = executor.crawl(&selector).await?;
 
     let formatted = formatter::format(artifacts);
 
