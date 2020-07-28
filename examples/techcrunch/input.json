@@ -1,0 +1,40 @@
+{
+  "_id": "tech_crunch",
+  "startUrl": [
+    "https://jp.techcrunch.com/"
+  ],
+  "selectors": [
+    {
+      "id": "link",
+      "type": "SelectorLink",
+      "parentSelectors": [
+        "_root"
+      ],
+      "selector": ".post-title a",
+      "multiple": true,
+      "delay": 0
+    },
+    {
+      "id": "title",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "link"
+      ],
+      "selector": "h1",
+      "multiple": false,
+      "regex": "",
+      "delay": 0
+    },
+    {
+      "id": "pub_date",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "link"
+      ],
+      "selector": ".title-left time",
+      "multiple": false,
+      "regex": "",
+      "delay": 0
+    }
+  ]
+}

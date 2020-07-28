@@ -1,4 +1,4 @@
-use crate::executor::{Artifact, Executor, FetchClient, FetchParam};
+use crate::executor::{Artifact, Executor, FetchClient};
 use crate::selector_node::SelectorTree;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
@@ -26,12 +26,20 @@ impl MockedFetcher {
 
 #[async_trait]
 impl FetchClient for MockedFetcher {
-    async fn fetch(&self, url: &String, _param: FetchParam) -> Result<Option<Html>> {
+    async fn fetch(&mut self, url: &String) -> Result<Option<Html>> {
         if let Some(content) = self.mapping.get(url) {
-            Ok(Some(Html::parse_fragment(content)))
+            if content.is_empty() {
+                Ok(None)
+            } else {
+                Ok(Some(Html::parse_fragment(content)))
+            }
         } else {
             Err(anyhow!("html not found by the url: {}", &url))
         }
+    }
+
+    fn gen_access_logs(self) -> HashMap<String, String> {
+        HashMap::new()
     }
 }
 
@@ -44,6 +52,7 @@ async fn fetcher_crawler_test() {
                 r###"
                     <a class="url" href="http://url-a.com">url a</a>
                     <a class="url" href="http://url-b.com">url b</a>
+                    <a class="url" href="http://url-c.com">url c</a>
                 "###
                 .to_string(),
             ),
@@ -65,6 +74,7 @@ async fn fetcher_crawler_test() {
                 "###
                 .to_string(),
             ),
+            ("http://url-c.com".to_string(), "".to_string()),
         ],
         r###"
 {
@@ -109,7 +119,6 @@ async fn fetcher_crawler_test() {
 }
     "###
         .to_string(),
-        HashMap::new(),
         vec![Artifact {
             tag: "source_url".to_string(),
             data: Rc::new("http://url-root.com/article".to_string()),
@@ -150,9 +159,9 @@ async fn fetcher_crawler_test() {
         }],
     )];
 
-    for (url_map, selector_json, access_log, expected) in test_data {
+    for (url_map, selector_json, expected) in test_data {
         let mocked_fetcher = MockedFetcher::new(url_map);
-        let executor = Executor::new(mocked_fetcher, access_log);
+        let executor = Executor::new(mocked_fetcher);
         let selector = SelectorTree::new(selector_json).unwrap();
         let (actual, _) = executor.crawl(&selector).await.unwrap();
 
