@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 use crate::executor::Artifact;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -8,7 +11,7 @@ pub fn format(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Rc<String>>> {
     let mut leaves: Vec<Artifact> = vec![];
 
     for artifact in artifacts {
-        if artifact.children.len() == 0 {
+        if artifact.children.len() == 0 && artifact.tag != "source_url" {
             leaves.push(artifact);
             continue;
         }

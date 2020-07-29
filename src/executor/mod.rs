@@ -4,59 +4,47 @@ mod test;
 use crate::selector_node::{SelectorNode, SelectorTree, SelectorType};
 use anyhow::Result;
 use async_trait::async_trait;
-use chrono::Utc;
 use reqwest;
-use reqwest::header::{HeaderValue, IF_MODIFIED_SINCE};
 use reqwest::{Client, Url};
 use scraper::{Html, Selector};
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 
 #[async_trait]
 pub trait FetchClient {
-    async fn fetch(&mut self, url: &String) -> Result<Option<Html>>;
-    fn gen_access_logs(self) -> HashMap<String, String>;
+    async fn fetch(&mut self, url: &String) -> Result<Html>;
+    fn gen_access_logs(self) -> Vec<String>;
 }
 
 pub struct WebFetcher {
-    access_log: HashMap<String, String>,
+    access_logs: Vec<String>,
     client: Client,
 }
 
 impl WebFetcher {
-    pub fn new(access_log: HashMap<String, String>) -> Self {
+    pub fn new() -> Self {
         WebFetcher {
             client: Client::new(),
-            access_log,
+            access_logs: vec![],
         }
     }
 }
 
 #[async_trait]
 impl FetchClient for WebFetcher {
-    async fn fetch(&mut self, url: &String) -> Result<Option<Html>> {
-        let mut req = self.client.get(Url::parse(url)?);
-        if let Some(date) = self.access_log.get(url) {
-            req = req.header(IF_MODIFIED_SINCE, HeaderValue::from_str(date)?);
-        }
+    async fn fetch(&mut self, url: &String) -> Result<Html> {
+        let req = self.client.get(Url::parse(url)?);
         let resp = req.send().await?.error_for_status()?;
-        if let Some(v) = resp.headers().get(reqwest::header::LAST_MODIFIED) {
-            self.access_log.insert(url.clone(), v.to_str()?.to_string());
-        } else {
-            self.access_log.insert(url.clone(), Utc::now().to_rfc2822());
-        }
-        if resp.status() == reqwest::StatusCode::NOT_MODIFIED {
-            return Ok(None);
-        }
+        self.access_logs.push(url.clone());
 
         let body = resp.text().await?;
-        Ok(Some(Html::parse_document(&body)))
+        Ok(Html::parse_document(&body))
     }
 
-    fn gen_access_logs(self) -> HashMap<String, String> {
-        self.access_log
+    fn gen_access_logs(self) -> Vec<String> {
+        self.access_logs
     }
 }
 
@@ -69,11 +57,17 @@ pub struct Artifact {
 
 pub struct Executor<F: FetchClient> {
     fetcher: F,
+    skip_urls: HashSet<String>,
 }
 
 impl<F: FetchClient> Executor<F> {
-    pub fn new(fetcher: F) -> Self {
-        Executor { fetcher }
+    pub fn new(fetcher: F, skip_urls_vec: Vec<String>) -> Self {
+        let mut skip_urls = HashSet::new();
+        for skip_url in skip_urls_vec {
+            skip_urls.insert(skip_url);
+        }
+
+        Executor { fetcher, skip_urls }
     }
 }
 
@@ -81,13 +75,9 @@ impl<F: 'static + FetchClient> Executor<F> {
     pub async fn crawl(
         mut self,
         selector_tree: &SelectorTree,
-    ) -> Result<(Vec<Artifact>, HashMap<String, String>)> {
-        let children;
-        if let Some(doc) = self.fetcher.fetch(&selector_tree.start_url).await? {
-            children = self.track_nodes(&selector_tree.selectors, &doc).await?;
-        } else {
-            children = vec![]
-        }
+    ) -> Result<(Vec<Artifact>, Vec<String>)> {
+        let doc = self.fetcher.fetch(&selector_tree.start_url).await?;
+        let children = self.track_nodes(&selector_tree.selectors, &doc).await?;
 
         Ok((
             vec![Artifact {
@@ -136,14 +126,15 @@ impl<F: 'static + FetchClient> Executor<F> {
         // TODO: use Arc<T> to 'SelectorNode'
         let mut artifacts: Vec<Artifact> = vec![];
         for url in urls {
-            // save as artifact only if it is first time
-            if let Some(children) = self.execute_url(node.clone(), Rc::clone(&url)).await? {
-                artifacts.push(Artifact {
-                    tag: node.id.clone(),
-                    data: Rc::clone(&url),
-                    children,
-                });
+            if self.skip_urls.contains(&*url) {
+                continue;
             }
+            let children = self.execute_url(node.clone(), Rc::clone(&url)).await?;
+            artifacts.push(Artifact {
+                tag: node.id.clone(),
+                data: Rc::clone(&url),
+                children,
+            });
         }
 
         Ok(artifacts)
@@ -154,13 +145,10 @@ impl<F: 'static + FetchClient> Executor<F> {
         &'a mut self,
         node: SelectorNode,
         url: Rc<String>,
-    ) -> Pin<Box<(dyn Future<Output = Result<Option<Vec<Artifact>>>> + 'a)>> {
+    ) -> Pin<Box<(dyn Future<Output = Result<Vec<Artifact>>> + 'a)>> {
         Box::pin(async move {
-            if let Some(doc) = self.fetcher.fetch(&url).await? {
-                Ok(Some(self.track_nodes(&node.children, &doc).await?))
-            } else {
-                Ok(None)
-            }
+            let doc = self.fetcher.fetch(&url).await?;
+            Ok(self.track_nodes(&node.children, &doc).await?)
         })
     }
 
