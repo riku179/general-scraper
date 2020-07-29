@@ -1,7 +1,11 @@
 #[cfg(test)]
 mod test;
+mod formatter;
+mod selector_node;
 
-use crate::selector_node::{SelectorNode, SelectorTree, SelectorType};
+pub use formatter::format;
+pub use selector_node::{SelectorTree, SelectorNode, SelectorType};
+
 use anyhow::Result;
 use async_trait::async_trait;
 use reqwest;

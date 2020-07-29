@@ -1,4 +1,4 @@
-use crate::executor::Artifact;
+use crate::crawler::Artifact;
 use crate::formatter::format;
 use std::collections::HashMap;
 use std::rc::Rc;

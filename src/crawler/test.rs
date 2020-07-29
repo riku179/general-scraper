@@ -1,4 +1,4 @@
-use crate::executor::{Artifact, Executor, FetchClient};
+use crate::crawler::{Artifact, Executor, FetchClient};
 use crate::selector_node::SelectorTree;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;

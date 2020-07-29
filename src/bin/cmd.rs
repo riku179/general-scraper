@@ -1,4 +1,4 @@
-use crate::selector_node::SelectorTree;
+use ::lib::crawler;
 use serde_json;
 use std::env;
 use std::error;
@@ -6,10 +6,6 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-
-mod executor;
-mod formatter;
-mod selector_node;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
@@ -30,13 +26,13 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     let sitemap = fs::read_to_string(input_filename)?;
     let skip_urls_str = fs::read_to_string(skip_urls_filename)?;
 
-    let selector = SelectorTree::new(sitemap)?;
+    let selector = crawler::SelectorTree::new(sitemap)?;
     let skip_urls: Vec<String> = serde_json::from_str(&skip_urls_str)?;
 
-    let executor = executor::Executor::new(executor::WebFetcher::new(), skip_urls);
+    let executor = crawler::Executor::new(crawler::WebFetcher::new(), skip_urls);
     let (artifacts, access_log) = executor.crawl(&selector).await?;
 
-    let formatted = formatter::format(artifacts);
+    let formatted = crawler::format(artifacts);
 
     output_file.write_all(serde_json::to_string_pretty(&formatted)?.as_bytes())?;
     access_log_file.write_all(serde_json::to_string_pretty(&access_log)?.as_bytes())?;

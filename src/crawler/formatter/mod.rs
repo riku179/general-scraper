@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test;
 
-use crate::executor::Artifact;
+use crate::crawler::Artifact;
 use std::collections::HashMap;
 use std::rc::Rc;
 

@@ -15,3 +15,11 @@ serde_json = "1.0"
 async-trait = "0.1.36"
 anyhow = "1.0.31"
 chrono = "0.4"
+
+[lib]
+name = "lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cmd"
+path = "src/bin/cmd.rs"
