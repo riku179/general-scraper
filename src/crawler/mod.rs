@@ -1,10 +1,10 @@
-#[cfg(test)]
-mod test;
 mod formatter;
 mod selector_node;
+#[cfg(test)]
+mod test;
 
 pub use formatter::format;
-pub use selector_node::{SelectorTree, SelectorNode, SelectorType};
+pub use selector_node::{SelectorNode, SelectorTree, SelectorType};
 
 use anyhow::Result;
 use async_trait::async_trait;
@@ -14,11 +14,11 @@ use scraper::{Html, Selector};
 use std::collections::HashSet;
 use std::future::Future;
 use std::pin::Pin;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[async_trait]
 pub trait FetchClient {
-    async fn fetch(&mut self, url: &String) -> Result<Html>;
+    async fn fetch(&mut self, url: &String) -> Result<String>;
     fn gen_access_logs(self) -> Vec<String>;
 }
 
@@ -38,13 +38,13 @@ impl WebFetcher {
 
 #[async_trait]
 impl FetchClient for WebFetcher {
-    async fn fetch(&mut self, url: &String) -> Result<Html> {
+    async fn fetch(&mut self, url: &String) -> Result<String> {
         let req = self.client.get(Url::parse(url)?);
         let resp = req.send().await?.error_for_status()?;
         self.access_logs.push(url.clone());
 
         let body = resp.text().await?;
-        Ok(Html::parse_document(&body))
+        Ok(body)
     }
 
     fn gen_access_logs(self) -> Vec<String> {
@@ -55,38 +55,38 @@ impl FetchClient for WebFetcher {
 #[derive(Debug, PartialEq)]
 pub struct Artifact {
     pub tag: String,
-    pub data: Rc<String>,
+    pub data: Arc<String>,
     pub children: Vec<Artifact>,
 }
 
-pub struct Executor<F: FetchClient> {
+pub struct Crawler<F: FetchClient> {
     fetcher: F,
     skip_urls: HashSet<String>,
 }
 
-impl<F: FetchClient> Executor<F> {
+impl<F: FetchClient> Crawler<F> {
     pub fn new(fetcher: F, skip_urls_vec: Vec<String>) -> Self {
         let mut skip_urls = HashSet::new();
         for skip_url in skip_urls_vec {
             skip_urls.insert(skip_url);
         }
 
-        Executor { fetcher, skip_urls }
+        Crawler { fetcher, skip_urls }
     }
 }
 
-impl<F: 'static + FetchClient> Executor<F> {
+impl<F: 'static + FetchClient + Send> Crawler<F> {
     pub async fn crawl(
         mut self,
         selector_tree: &SelectorTree,
     ) -> Result<(Vec<Artifact>, Vec<String>)> {
         let doc = self.fetcher.fetch(&selector_tree.start_url).await?;
-        let children = self.track_nodes(&selector_tree.selectors, &doc).await?;
+        let children = self.track_nodes(&selector_tree.selectors, &doc.clone()).await?;
 
         Ok((
             vec![Artifact {
                 tag: "source_url".to_string(),
-                data: Rc::new(selector_tree.start_url.clone()),
+                data: Arc::new(selector_tree.start_url.clone()),
                 children,
             }],
             self.fetcher.gen_access_logs(),
@@ -96,7 +96,7 @@ impl<F: 'static + FetchClient> Executor<F> {
     async fn track_nodes(
         &mut self,
         nodes: &Vec<SelectorNode>, // title, body
-        doc: &Html,                // contents page
+        doc: &String,                // contents page
     ) -> Result<Vec<Artifact>> {
         let mut artifacts: Vec<Artifact> = vec![];
         for node in nodes {
@@ -109,7 +109,7 @@ impl<F: 'static + FetchClient> Executor<F> {
                     let data = Self::track_text_node(&node, &doc).await?;
                     artifacts.push(Artifact {
                         tag: node.id.clone(),
-                        data: Rc::new(data),
+                        data: Arc::new(data),
                         children: vec![],
                     })
                 }
@@ -120,23 +120,31 @@ impl<F: 'static + FetchClient> Executor<F> {
         Ok(artifacts)
     }
 
-    async fn track_link_node(&mut self, node: &SelectorNode, doc: &Html) -> Result<Vec<Artifact>> {
-        let selector = Selector::parse(&node.selector).unwrap();
-        let urls: Vec<Rc<String>> = doc
-            .select(&selector)
-            .map(|element| Rc::new(element.value().attr("href").unwrap().to_string()))
-            .collect();
+    async fn track_link_node(&mut self, node: &SelectorNode, doc: &String) -> Result<Vec<Artifact>> {
+        let urls: Vec<Arc<String>>;
+        {
+            let doc = Html::parse_document(doc);
+            let selector = Selector::parse(&node.selector).unwrap();
+            urls = doc
+                .select(&selector)
+                .map(|element| Arc::new(element.value().attr("href").unwrap().to_string()))
+                .collect();
+        }
 
-        // TODO: use Arc<T> to 'SelectorNode'
         let mut artifacts: Vec<Artifact> = vec![];
         for url in urls {
             if self.skip_urls.contains(&*url) {
                 continue;
             }
-            let children = self.execute_url(node.clone(), Rc::clone(&url)).await?;
+            let children = self.
+                execute_url(
+                    node.clone(),
+                    url.clone()
+                ).
+                await?;
             artifacts.push(Artifact {
                 tag: node.id.clone(),
-                data: Rc::clone(&url),
+                data: url.clone(),
                 children,
             });
         }
@@ -148,15 +156,16 @@ impl<F: 'static + FetchClient> Executor<F> {
     fn execute_url<'a>(
         &'a mut self,
         node: SelectorNode,
-        url: Rc<String>,
-    ) -> Pin<Box<(dyn Future<Output = Result<Vec<Artifact>>> + 'a)>> {
+        url: Arc<String>,
+    ) -> Pin<Box<(dyn Future<Output = Result<Vec<Artifact>>> + 'a + Send)>> {
         Box::pin(async move {
             let doc = self.fetcher.fetch(&url).await?;
             Ok(self.track_nodes(&node.children, &doc).await?)
         })
     }
 
-    async fn track_text_node(node: &SelectorNode, doc: &Html) -> Result<String> {
+    async fn track_text_node(node: &SelectorNode, doc: &String) -> Result<String> {
+        let doc = Html::parse_document(doc);
         let selector = Selector::parse(&node.selector).unwrap();
 
         let text: String = doc

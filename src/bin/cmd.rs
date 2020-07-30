@@ -29,10 +29,10 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     let selector = crawler::SelectorTree::new(sitemap)?;
     let skip_urls: Vec<String> = serde_json::from_str(&skip_urls_str)?;
 
-    let executor = crawler::Executor::new(crawler::WebFetcher::new(), skip_urls);
+    let executor = crawler::Crawler::new(crawler::WebFetcher::new(), skip_urls);
     let (artifacts, access_log) = executor.crawl(&selector).await?;
 
-    let formatted = crawler::format(artifacts);
+    let formatted = crawler::format(artifacts, vec!["title", "link", "pub_date", "source_url"])?;
 
     output_file.write_all(serde_json::to_string_pretty(&formatted)?.as_bytes())?;
     access_log_file.write_all(serde_json::to_string_pretty(&access_log)?.as_bytes())?;

@@ -1,10 +1,10 @@
-use crate::crawler::{Artifact, Executor, FetchClient};
-use crate::selector_node::SelectorTree;
+use crate::crawler::{Artifact, Crawler, FetchClient};
+use crate::crawler::selector_node::SelectorTree;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use scraper::Html;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 use tokio;
 
 // mapping Url -> Html
@@ -26,9 +26,9 @@ impl MockedFetcher {
 
 #[async_trait]
 impl FetchClient for MockedFetcher {
-    async fn fetch(&mut self, url: &String) -> Result<Html> {
+    async fn fetch(&mut self, url: &String) -> Result<String> {
         if let Some(content) = self.mapping.get(url) {
-            Ok(Html::parse_fragment(content))
+            Ok(content.clone())
         } else {
             Err(anyhow!("html not found by the url: {}", &url))
         }
@@ -115,36 +115,36 @@ async fn fetcher_crawler_test() {
         .to_string(),
         vec![Artifact {
             tag: "source_url".to_string(),
-            data: Rc::new("http://url-root.com/article".to_string()),
+            data: Arc::new("http://url-root.com/article".to_string()),
             children: vec![
                 Artifact {
                     tag: "link".to_string(),
-                    data: Rc::new("http://url-a.com".to_string()),
+                    data: Arc::new("http://url-a.com".to_string()),
                     children: vec![
                         Artifact {
                             tag: "title".to_string(),
-                            data: Rc::new("title A".to_string()),
+                            data: Arc::new("title A".to_string()),
                             children: vec![],
                         },
                         Artifact {
                             tag: "body".to_string(),
-                            data: Rc::new("body A1 body A2".to_string()),
+                            data: Arc::new("body A1 body A2".to_string()),
                             children: vec![],
                         },
                     ],
                 },
                 Artifact {
                     tag: "link".to_string(),
-                    data: Rc::new("http://url-b.com".to_string()),
+                    data: Arc::new("http://url-b.com".to_string()),
                     children: vec![
                         Artifact {
                             tag: "title".to_string(),
-                            data: Rc::new("title B".to_string()),
+                            data: Arc::new("title B".to_string()),
                             children: vec![],
                         },
                         Artifact {
                             tag: "body".to_string(),
-                            data: Rc::new("body B1 body B2".to_string()),
+                            data: Arc::new("body B1 body B2".to_string()),
                             children: vec![],
                         },
                     ],
@@ -155,7 +155,7 @@ async fn fetcher_crawler_test() {
 
     for (url_map, selector_json, expected) in test_data {
         let mocked_fetcher = MockedFetcher::new(url_map);
-        let executor = Executor::new(mocked_fetcher, vec![]);
+        let executor = Crawler::new(mocked_fetcher, vec![]);
         let selector = SelectorTree::new(selector_json).unwrap();
         let (actual, _) = executor.crawl(&selector).await.unwrap();
 

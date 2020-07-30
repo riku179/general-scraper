@@ -2,11 +2,32 @@
 mod test;
 
 use crate::crawler::Artifact;
+use anyhow::{anyhow, Result};
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
-pub fn format(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Rc<String>>> {
-    let mut result: Vec<HashMap<String, Rc<String>>> = vec![];
+pub fn format(artifacts: Vec<Artifact>, column: Vec<&'static str>) -> Result<Vec<Vec<Arc<String>>>> {
+    let mut result = Vec::with_capacity(artifacts.len());
+
+    let contents = format_map_list(artifacts);
+
+    for content in contents {
+        let mut row = Vec::with_capacity(column.len());
+        for col in &column {
+            if let Some(v) = content.get(*col) {
+                row.push(v.clone());
+            } else {
+                return Err(anyhow!("field '{}' not found in {:?}", col, content));
+            }
+        }
+        result.push(row);
+    }
+
+    Ok(result)
+}
+
+fn format_map_list(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Arc<String>>> {
+    let mut result: Vec<HashMap<String, Arc<String>>> = Vec::with_capacity(artifacts.len());
 
     let mut leaves: Vec<Artifact> = vec![];
 
@@ -16,10 +37,10 @@ pub fn format(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Rc<String>>> {
             continue;
         }
 
-        let mut children = format(artifact.children);
+        let mut children = format_map_list(artifact.children);
 
         for child in &mut children {
-            child.insert(artifact.tag.clone(), Rc::clone(&artifact.data));
+            child.insert(artifact.tag.clone(), artifact.data.clone());
         }
         result.append(&mut children)
     }
@@ -29,7 +50,7 @@ pub fn format(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Rc<String>>> {
         for leaf in leaves {
             map.insert(leaf.tag, leaf.data);
         }
-        // pattern A
+
         result.push(map);
     }
 
