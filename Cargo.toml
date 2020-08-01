@@ -17,6 +17,7 @@ anyhow = "1.0.31"
 chrono = "0.4"
 rayon = "1.1"
 sha-1 = "0.9.1"
+futures = "0.3"
 
 [lib]
 name = "lib"

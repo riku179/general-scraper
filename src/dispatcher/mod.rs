@@ -1,10 +1,11 @@
 mod job;
+mod datastore;
 
 use crate::entity::{Content, Source};
 use anyhow::Result;
 use chrono::Duration;
 use crate::dispatcher::job::kick;
-use tokio;
+use futures::future::join_all;
 
 pub trait DataStore {
     // offset期間以上に更新されていない古いsourcesをすべて取得する
@@ -24,9 +25,12 @@ impl<D: DataStore> Dispatcher<D> {
 
     async fn start(&self) -> Result<()> {
         let sources = self.data_store.get_stale_sources(Duration::hours(1))?;
+        let mut jobs = vec![];
         for source in sources {
-            let x = tokio::spawn(kick(source));
+            let x = kick(source);
+            jobs.push(x);
         }
+        let results = join_all(jobs).await;
 
         Ok(())
     }
