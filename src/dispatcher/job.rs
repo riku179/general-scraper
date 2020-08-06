@@ -4,7 +4,7 @@ use anyhow::Result;
 use chrono::Utc;
 use sha1::{Digest, Sha1};
 
-pub async fn kick(source: Source) -> Result<(Vec<Content>, Vec<String>)> {
+pub async fn kick(source: Source) -> Result<(i32, Vec<Content>, Vec<String>)> {
     let crawler = Crawler::new(WebFetcher::new(), source.last_accessed_urls.clone());
     let (artifacts, accessed_urls) = crawler.crawl(&source.selectors).await?;
 
@@ -26,5 +26,5 @@ pub async fn kick(source: Source) -> Result<(Vec<Content>, Vec<String>)> {
         })
         .collect::<Result<Vec<Content>>>()?;
 
-    Ok((contents, accessed_urls))
+    Ok((source.id, contents, accessed_urls))
 }

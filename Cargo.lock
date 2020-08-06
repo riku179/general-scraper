@@ -524,6 +524,7 @@ dependencies = [
  "diesel",
  "dotenv",
  "futures",
+ "log",
  "r2d2",
  "rayon",
  "reqwest",

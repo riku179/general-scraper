@@ -7,6 +7,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Duration;
 use futures::future::join_all;
+use log;
 
 #[async_trait]
 pub trait DataStore {
@@ -19,6 +20,8 @@ pub trait DataStore {
         contents: Vec<Content>,
         accessed_urls: Vec<String>,
     ) -> Result<()>;
+    // sourceの新規作成
+    // async fn add_source(&self, Source) -> Result<Source>;
 }
 
 pub struct Dispatcher<D: DataStore> {
@@ -41,6 +44,17 @@ impl<D: DataStore> Dispatcher<D> {
             jobs.push(x);
         }
         let results = join_all(jobs).await;
+
+        for result in results {
+            if let Ok((source_id, contents, accessed_urls)) = result {
+                let result = self.data_store.commit_job_result(source_id, contents, accessed_urls).await;
+                if let Err(err) = result {
+                    log::error!("failed to store job result: {:?}", err)
+                }
+            } else {
+                log::error!("failed to execute job: {:?}", result.unwrap_err())
+            }
+        }
 
         Ok(())
     }
