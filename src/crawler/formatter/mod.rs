@@ -6,7 +6,10 @@ use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-pub fn format(artifacts: Vec<Artifact>, column: Vec<&'static str>) -> Result<Vec<Vec<Arc<String>>>> {
+pub fn format(
+    artifacts: Vec<Artifact>,
+    column: Vec<&'static str>,
+) -> Result<Vec<Vec<Arc<String>>>> {
     let mut result = Vec::with_capacity(artifacts.len());
 
     let contents = format_map_list(artifacts);

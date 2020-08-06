@@ -81,7 +81,9 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         selector_tree: &SelectorTree,
     ) -> Result<(Vec<Artifact>, Vec<String>)> {
         let doc = self.fetcher.fetch(&selector_tree.start_url).await?;
-        let children = self.track_nodes(&selector_tree.selectors, &doc.clone()).await?;
+        let children = self
+            .track_nodes(&selector_tree.selectors, &doc.clone())
+            .await?;
 
         Ok((
             vec![Artifact {
@@ -96,7 +98,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
     async fn track_nodes(
         &mut self,
         nodes: &Vec<SelectorNode>, // title, body
-        doc: &String,                // contents page
+        doc: &String,              // contents page
     ) -> Result<Vec<Artifact>> {
         let mut artifacts: Vec<Artifact> = vec![];
         for node in nodes {
@@ -120,7 +122,11 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         Ok(artifacts)
     }
 
-    async fn track_link_node(&mut self, node: &SelectorNode, doc: &String) -> Result<Vec<Artifact>> {
+    async fn track_link_node(
+        &mut self,
+        node: &SelectorNode,
+        doc: &String,
+    ) -> Result<Vec<Artifact>> {
         let urls: Vec<Arc<String>>;
         {
             let doc = Html::parse_document(doc);
@@ -136,12 +142,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
             if self.skip_urls.contains(&*url) {
                 continue;
             }
-            let children = self.
-                execute_url(
-                    node.clone(),
-                    url.clone()
-                ).
-                await?;
+            let children = self.execute_url(node.clone(), url.clone()).await?;
             artifacts.push(Artifact {
                 tag: node.id.clone(),
                 data: url.clone(),

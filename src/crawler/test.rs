@@ -1,5 +1,5 @@
-use crate::crawler::{Artifact, Crawler, FetchClient};
 use crate::crawler::selector_node::SelectorTree;
+use crate::crawler::{Artifact, Crawler, FetchClient};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use scraper::Html;

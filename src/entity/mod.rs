@@ -1,8 +1,9 @@
 use crate::crawler::SelectorTree;
 use chrono::{DateTime, Utc};
 
+#[derive(Debug)]
 pub struct Source {
-    pub id: i32, // incremental
+    pub id: i32,
     pub name: String,
     pub url: String,
     pub selectors: SelectorTree,
@@ -11,8 +12,9 @@ pub struct Source {
     pub created_at: DateTime<Utc>,
 }
 
+#[derive(Debug)]
 pub struct Content {
-    pub id: String, // probably sha1
+    pub id: String,
     pub url: String,
     pub source_id: i32,
     pub title: String,
