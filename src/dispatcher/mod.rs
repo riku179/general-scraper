@@ -21,7 +21,7 @@ pub trait DataStore {
         accessed_urls: Vec<String>,
     ) -> Result<()>;
     // sourceの新規作成
-    // async fn add_source(&self, Source) -> Result<Source>;
+    async fn add_source(&self, source: Source) -> Result<()>;
 }
 
 pub struct Dispatcher<D: DataStore> {
@@ -47,7 +47,10 @@ impl<D: DataStore> Dispatcher<D> {
 
         for result in results {
             if let Ok((source_id, contents, accessed_urls)) = result {
-                let result = self.data_store.commit_job_result(source_id, contents, accessed_urls).await;
+                let result = self
+                    .data_store
+                    .commit_job_result(source_id, contents, accessed_urls)
+                    .await;
                 if let Err(err) = result {
                     log::error!("failed to store job result: {:?}", err)
                 }

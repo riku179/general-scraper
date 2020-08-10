@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod test;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json;
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Serialize)]
 pub struct SelectorTree {
     pub start_url: String,
     pub selectors: Vec<SelectorNode>,
@@ -20,7 +20,7 @@ impl SelectorTree {
     }
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Serialize)]
 pub struct SelectorNode {
     pub id: String,
     pub selector_type: SelectorType,
@@ -62,7 +62,7 @@ fn build_selector_node(raw_selectors: &Vec<RawSelector>, parent_id: &String) -> 
     children_selectors
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Serialize)]
 pub enum SelectorType {
     Text,
     Link,

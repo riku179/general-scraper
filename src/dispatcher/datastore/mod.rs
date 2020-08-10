@@ -2,17 +2,16 @@ mod models;
 mod schema;
 
 use crate::crawler::SelectorTree;
+use crate::dispatcher::datastore::models::SourceInsertModel;
 use crate::dispatcher::DataStore;
 use crate::entity::{Content, Source};
 use anyhow::{Error, Result};
 use async_trait::async_trait;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, NaiveDate, Utc};
 use diesel;
 use diesel::prelude::*;
-// use diesel::result::Error;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::sqlite::SqliteConnection;
-use futures::TryFutureExt;
 use models::{ContentModel, SourceModel};
 use tokio;
 
@@ -102,6 +101,33 @@ impl DataStore for DataStoreAdapter {
                         .execute(&*con)?)
                 }
             })
+        })
+        .await?;
+
+        insert_result.map(|_| ())
+    }
+
+    async fn add_source(&self, source: Source) -> Result<()> {
+        use schema::sources::dsl::*;
+
+        let pool = self.pool.clone();
+
+        let insert_result: Result<_> = tokio::task::spawn_blocking(move || {
+            let con = pool.get()?;
+
+            let selectors_json = serde_json::to_string(&source.selectors)?;
+
+            let size = diesel::insert_into(sources)
+                .values(&SourceInsertModel {
+                    name: source.name,
+                    url: source.url,
+                    selectors: selectors_json,
+                    last_accessed: NaiveDate::from_ymd(1970, 1, 1).and_hms(0, 0, 0),
+                    last_accessed_urls: "".to_string(),
+                })
+                .execute(&*con)?;
+
+            Ok(size)
         })
         .await?;
 

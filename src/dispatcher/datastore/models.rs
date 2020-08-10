@@ -1,4 +1,5 @@
 use crate::dispatcher::datastore::schema::contents;
+use crate::dispatcher::datastore::schema::sources;
 use chrono::NaiveDateTime;
 
 #[derive(Debug, Queryable)]
@@ -10,6 +11,16 @@ pub struct SourceModel {
     pub last_accessed: NaiveDateTime,
     pub last_accessed_urls: String,
     pub created_at: NaiveDateTime,
+}
+
+#[derive(Debug, Insertable)]
+#[table_name = "sources"]
+pub struct SourceInsertModel {
+    pub name: String,
+    pub url: String,
+    pub selectors: String,
+    pub last_accessed: NaiveDateTime,
+    pub last_accessed_urls: String,
 }
 
 #[derive(Debug, Insertable)]
