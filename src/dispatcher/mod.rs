@@ -1,6 +1,9 @@
 mod datastore;
 mod job;
 
+pub use datastore::DataStoreAdapter;
+
+use crate::crawler::SelectorTree;
 use crate::dispatcher::job::kick;
 use crate::entity::{Content, Source};
 use anyhow::Result;
@@ -21,7 +24,7 @@ pub trait DataStore {
         accessed_urls: Vec<String>,
     ) -> Result<()>;
     // sourceの新規作成
-    async fn add_source(&self, source: Source) -> Result<()>;
+    async fn add_source(&self, selector_tree: SelectorTree) -> Result<()>;
 }
 
 pub struct Dispatcher<D: DataStore> {
@@ -29,14 +32,14 @@ pub struct Dispatcher<D: DataStore> {
 }
 
 impl<D: DataStore> Dispatcher<D> {
-    fn new(data_store: D) -> Self {
+    pub fn new(data_store: D) -> Self {
         Dispatcher { data_store }
     }
 
-    async fn start(&self) -> Result<()> {
+    pub async fn start(&self, offset: Duration) -> Result<()> {
         let sources = self
             .data_store
-            .get_stale_sources(Duration::hours(1))
+            .get_stale_sources(offset)
             .await?;
         let mut jobs = vec![];
         for source in sources {

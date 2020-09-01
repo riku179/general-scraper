@@ -20,7 +20,7 @@ pub struct DataStoreAdapter {
 }
 
 impl DataStoreAdapter {
-    fn new(pool: Pool<ConnectionManager<SqliteConnection>>) -> Self {
+    pub fn new(pool: Pool<ConnectionManager<SqliteConnection>>) -> Self {
         DataStoreAdapter { pool }
     }
 }
@@ -45,7 +45,7 @@ impl DataStore for DataStoreAdapter {
                     id: model.id,
                     name: model.name,
                     url: model.url,
-                    selectors: SelectorTree::new(model.selectors)?,
+                    selectors: SelectorTree::from_json(model.selectors)?,
                     last_accessed: DateTime::<Utc>::from_utc(model.last_accessed, Utc),
                     last_accessed_urls: model
                         .last_accessed_urls
@@ -96,9 +96,19 @@ impl DataStore for DataStoreAdapter {
                 {
                     use schema::sources::dsl::*;
                     let target_source = sources.filter(id.eq(source_id));
-                    Ok(diesel::update(target_source)
-                        .set(last_accessed_urls.eq(accessed_urls.join(",")))
-                        .execute(&*con)?)
+
+                    if accessed_urls.len() != 0 {
+                        Ok(diesel::update(target_source)
+                            .set((
+                                last_accessed_urls.eq(accessed_urls.join(",")),
+                                last_accessed.eq(Utc::now().naive_utc()),
+                            ))
+                            .execute(&*con)?)
+                    } else {
+                        Ok(diesel::update(target_source)
+                            .set(last_accessed.eq(Utc::now().naive_utc()))
+                            .execute(&*con)?)
+                    }
                 }
             })
         })
@@ -107,7 +117,7 @@ impl DataStore for DataStoreAdapter {
         insert_result.map(|_| ())
     }
 
-    async fn add_source(&self, source: Source) -> Result<()> {
+    async fn add_source(&self, selector_tree: SelectorTree) -> Result<()> {
         use schema::sources::dsl::*;
 
         let pool = self.pool.clone();
@@ -115,12 +125,12 @@ impl DataStore for DataStoreAdapter {
         let insert_result: Result<_> = tokio::task::spawn_blocking(move || {
             let con = pool.get()?;
 
-            let selectors_json = serde_json::to_string(&source.selectors)?;
+            let selectors_json = serde_json::to_string(&selector_tree)?;
 
             let size = diesel::insert_into(sources)
                 .values(&SourceInsertModel {
-                    name: source.name,
-                    url: source.url,
+                    name: selector_tree._id,
+                    url: selector_tree.start_url,
                     selectors: selectors_json,
                     last_accessed: NaiveDate::from_ymd(1970, 1, 1).and_hms(0, 0, 0),
                     last_accessed_urls: "".to_string(),

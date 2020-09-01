@@ -1,6 +1,5 @@
 use crate::crawler::format;
 use crate::crawler::Artifact;
-use std::collections::HashMap;
 use std::sync::Arc;
 
 #[test]

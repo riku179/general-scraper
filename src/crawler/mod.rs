@@ -18,7 +18,7 @@ use std::sync::Arc;
 
 #[async_trait]
 pub trait FetchClient {
-    async fn fetch(&mut self, url: &String) -> Result<String>;
+    async fn fetch(&mut self, url: &String, logging: bool) -> Result<String>;
     fn gen_access_logs(self) -> Vec<String>;
 }
 
@@ -38,10 +38,12 @@ impl WebFetcher {
 
 #[async_trait]
 impl FetchClient for WebFetcher {
-    async fn fetch(&mut self, url: &String) -> Result<String> {
+    async fn fetch(&mut self, url: &String, logging: bool) -> Result<String> {
         let req = self.client.get(Url::parse(url)?);
         let resp = req.send().await?.error_for_status()?;
-        self.access_logs.push(url.clone());
+        if logging {
+            self.access_logs.push(url.clone());
+        }
 
         let body = resp.text().await?;
         Ok(body)
@@ -80,7 +82,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         mut self,
         selector_tree: &SelectorTree,
     ) -> Result<(Vec<Artifact>, Vec<String>)> {
-        let doc = self.fetcher.fetch(&selector_tree.start_url).await?;
+        let doc = self.fetcher.fetch(&selector_tree.start_url, false).await?;
         let children = self
             .track_nodes(&selector_tree.selectors, &doc.clone())
             .await?;
@@ -97,8 +99,8 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
 
     async fn track_nodes(
         &mut self,
-        nodes: &Vec<SelectorNode>, // title, body
-        doc: &String,              // contents page
+        nodes: &Vec<SelectorNode>,
+        doc: &String,
     ) -> Result<Vec<Artifact>> {
         let mut artifacts: Vec<Artifact> = vec![];
         for node in nodes {
@@ -160,7 +162,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         url: Arc<String>,
     ) -> Pin<Box<(dyn Future<Output = Result<Vec<Artifact>>> + 'a + Send)>> {
         Box::pin(async move {
-            let doc = self.fetcher.fetch(&url).await?;
+            let doc = self.fetcher.fetch(&url, true).await?;
             Ok(self.track_nodes(&node.children, &doc).await?)
         })
     }

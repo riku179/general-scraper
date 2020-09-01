@@ -4,23 +4,29 @@ mod test;
 use serde::{Deserialize, Serialize};
 use serde_json;
 
-#[derive(Clone, PartialEq, Debug, Serialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct SelectorTree {
+    pub _id: String,
     pub start_url: String,
     pub selectors: Vec<SelectorNode>,
 }
 
 impl SelectorTree {
-    pub fn new(json: String) -> Result<Self, serde_json::Error> {
-        let sitemap = SiteMap::new(json)?;
+    pub fn new(sitemap_json: String) -> Result<Self, serde_json::Error> {
+        let sitemap = SiteMap::new(sitemap_json)?;
         Ok(SelectorTree {
+            _id: sitemap._id.clone(),
             start_url: sitemap.start_url[0].clone(),
             selectors: SelectorNode::new(sitemap),
         })
     }
+
+    pub fn from_json(json: String) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(&json)
+    }
 }
 
-#[derive(Clone, PartialEq, Debug, Serialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct SelectorNode {
     pub id: String,
     pub selector_type: SelectorType,
@@ -62,7 +68,7 @@ fn build_selector_node(raw_selectors: &Vec<RawSelector>, parent_id: &String) -> 
     children_selectors
 }
 
-#[derive(Clone, PartialEq, Debug, Serialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum SelectorType {
     Text,
     Link,
