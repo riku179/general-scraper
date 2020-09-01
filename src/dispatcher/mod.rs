@@ -37,10 +37,7 @@ impl<D: DataStore> Dispatcher<D> {
     }
 
     pub async fn start(&self, offset: Duration) -> Result<()> {
-        let sources = self
-            .data_store
-            .get_stale_sources(offset)
-            .await?;
+        let sources = self.data_store.get_stale_sources(offset).await?;
         let mut jobs = vec![];
         for source in sources {
             let x = kick(source);
