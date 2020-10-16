@@ -20,8 +20,12 @@ jobs:
       uses: actions/cache@v2
       with:
         path: |
-          ~/target/debug/build
-        key: ${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          ~/.cargo/registry
+          ~/.cargo/git
+          target/debug
+        key: ${{ runner.os }}-stable-cache-${{ hashFiles('**/Cargo.lock') }}
+        restore_keys: |
+          ${{ runner.os }}-stable-cache-
     - name: Build
       run: cargo build
     - name: Run tests
