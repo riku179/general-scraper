@@ -108,7 +108,7 @@ DSLのフォーマットは[WebScraper](https://webscraper.io/)のSitemapに基�
 - DSL
   - [x] Linkセレクタに対応
   - [x] Textセレクタに対応
-  - [ ] Elementに対応
+  - [x] Elementに対応
   - [ ] Imageセレクタに対応
 - crawler
   - [x] 再帰的なDSLのクロールに対応

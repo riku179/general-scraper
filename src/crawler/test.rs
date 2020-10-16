@@ -33,43 +33,44 @@ impl FetchClient for MockedFetcher {
         }
     }
 
-    fn gen_access_logs(self) -> Vec<String> {
+    fn dump_access_logs(self) -> Vec<String> {
         vec![]
     }
 }
 
 #[tokio::test]
 async fn fetcher_crawler_test() {
-    let test_data = vec![(
-        vec![
-            (
-                "http://url-root.com/article".to_string(),
-                r###"
+    let test_data = vec![
+        (
+            vec![
+                (
+                    "http://url-root.com/article".to_string(),
+                    r###"
                     <a class="url" href="http://url-a.com">url a</a>
                     <a class="url" href="http://url-b.com">url b</a>
                 "###
-                .to_string(),
-            ),
-            (
-                "http://url-a.com".to_string(),
-                r###"
+                    .to_string(),
+                ),
+                (
+                    "http://url-a.com".to_string(),
+                    r###"
                     <p class="title">title A</p>
                     <p class="body">body A1</p>
                     <p class="body">body A2</p>
                 "###
-                .to_string(),
-            ),
-            (
-                "http://url-b.com".to_string(),
-                r###"
+                    .to_string(),
+                ),
+                (
+                    "http://url-b.com".to_string(),
+                    r###"
                     <p class="title">title B</p>
                     <p class="body">body B1</p>
                     <p class="body">body B2</p>
                 "###
-                .to_string(),
-            ),
-        ],
-        r###"
+                    .to_string(),
+                ),
+            ],
+            r###"
 {
   "_id": "test",
   "startUrl": [
@@ -111,46 +112,164 @@ async fn fetcher_crawler_test() {
   ]
 }
     "###
-        .to_string(),
-        vec![Artifact {
-            tag: "source_url".to_string(),
-            data: Arc::new("http://url-root.com/article".to_string()),
-            children: vec![
-                Artifact {
-                    tag: "link".to_string(),
-                    data: Arc::new("http://url-a.com".to_string()),
-                    children: vec![
-                        Artifact {
-                            tag: "title".to_string(),
-                            data: Arc::new("title A".to_string()),
-                            children: vec![],
-                        },
-                        Artifact {
-                            tag: "body".to_string(),
-                            data: Arc::new("body A1 body A2".to_string()),
-                            children: vec![],
-                        },
-                    ],
-                },
-                Artifact {
-                    tag: "link".to_string(),
-                    data: Arc::new("http://url-b.com".to_string()),
-                    children: vec![
-                        Artifact {
-                            tag: "title".to_string(),
-                            data: Arc::new("title B".to_string()),
-                            children: vec![],
-                        },
-                        Artifact {
-                            tag: "body".to_string(),
-                            data: Arc::new("body B1 body B2".to_string()),
-                            children: vec![],
-                        },
-                    ],
-                },
-            ],
-        }],
-    )];
+            .to_string(),
+            vec![Artifact {
+                tag: "source_url".to_string(),
+                data: Some(Arc::new("http://url-root.com/article".to_string())),
+                children: vec![
+                    Artifact {
+                        tag: "link".to_string(),
+                        data: Some(Arc::new("http://url-a.com".to_string())),
+                        children: vec![
+                            Artifact {
+                                tag: "title".to_string(),
+                                data: Some(Arc::new("title A".to_string())),
+                                children: vec![],
+                            },
+                            Artifact {
+                                tag: "body".to_string(),
+                                data: Some(Arc::new("body A1 body A2".to_string())),
+                                children: vec![],
+                            },
+                        ],
+                    },
+                    Artifact {
+                        tag: "link".to_string(),
+                        data: Some(Arc::new("http://url-b.com".to_string())),
+                        children: vec![
+                            Artifact {
+                                tag: "title".to_string(),
+                                data: Some(Arc::new("title B".to_string())),
+                                children: vec![],
+                            },
+                            Artifact {
+                                tag: "body".to_string(),
+                                data: Some(Arc::new("body B1 body B2".to_string())),
+                                children: vec![],
+                            },
+                        ],
+                    },
+                ],
+            }],
+        ),
+        (
+            vec![(
+                "http://url-root.com/article".to_string(),
+                r###"
+                    <div class="contents">
+                        <p class="title">title a</p>
+                        <p class="body">body a</p>
+                    </div>
+                    <div class="contents">
+                        <p class="title">title b</p>
+                        <p class="body">body b</p>
+                    </div>
+                    <div class="contents">
+                        <p class="title">title c</p>
+                        <p class="body">body c</p>
+                    </div>
+                "###
+                .to_string(),
+            )],
+            r###"
+{
+  "_id": "test",
+  "startUrl": [
+    "http://url-root.com/article"
+  ],
+  "selectors": [
+    {
+      "id": "content",
+      "type": "SelectorElement",
+      "parentSelectors": [
+        "_root"
+      ],
+      "selector": ".contents",
+      "multiple": true,
+      "delay": 0
+    },
+    {
+      "id": "title",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "content"
+      ],
+      "selector": ".title",
+      "multiple": false,
+      "regex": "",
+      "delay": 0
+    },
+    {
+      "id": "body",
+      "type": "SelectorText",
+      "parentSelectors": [
+        "content"
+      ],
+      "selector": ".body",
+      "multiple": true,
+      "regex": "",
+      "delay": 0
+    }
+  ]
+}
+    "###
+            .to_string(),
+            vec![Artifact {
+                tag: "source_url".to_string(),
+                data: Some(Arc::new("http://url-root.com/article".to_string())),
+                children: vec![
+                    Artifact {
+                        tag: "content".to_string(),
+                        data: None,
+                        children: vec![
+                            Artifact {
+                                tag: "title".to_string(),
+                                data: Some(Arc::new("title a".to_string())),
+                                children: vec![],
+                            },
+                            Artifact {
+                                tag: "body".to_string(),
+                                data: Some(Arc::new("body a".to_string())),
+                                children: vec![],
+                            },
+                        ],
+                    },
+                    Artifact {
+                        tag: "content".to_string(),
+                        data: None,
+                        children: vec![
+                            Artifact {
+                                tag: "title".to_string(),
+                                data: Some(Arc::new("title b".to_string())),
+                                children: vec![],
+                            },
+                            Artifact {
+                                tag: "body".to_string(),
+                                data: Some(Arc::new("body b".to_string())),
+                                children: vec![],
+                            },
+                        ],
+                    },
+                    Artifact {
+                        tag: "content".to_string(),
+                        data: None,
+                        children: vec![
+                            Artifact {
+                                tag: "title".to_string(),
+                                data: Some(Arc::new("title c".to_string())),
+                                children: vec![],
+                            },
+                            Artifact {
+                                tag: "body".to_string(),
+                                data: Some(Arc::new("body c".to_string())),
+                                children: vec![],
+                            },
+                        ],
+                    },
+                ],
+            }],
+        ),
+    ];
 
     for (url_map, selector_json, expected) in test_data {
         let mocked_fetcher = MockedFetcher::new(url_map);

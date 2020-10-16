@@ -29,12 +29,15 @@ pub fn format(
     Ok(result)
 }
 
+// flatten artifact tree to list of key-value
 fn format_map_list(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Arc<String>>> {
     let mut result: Vec<HashMap<String, Arc<String>>> = Vec::with_capacity(artifacts.len());
 
+    // set of artifacts which do not have children
     let mut leaves: Vec<Artifact> = vec![];
 
     for artifact in artifacts {
+        // skip leaf node and "source_url" node to push all rows after all
         if artifact.children.len() == 0 && artifact.tag != "source_url" {
             leaves.push(artifact);
             continue;
@@ -43,15 +46,21 @@ fn format_map_list(artifacts: Vec<Artifact>) -> Vec<HashMap<String, Arc<String>>
         let mut children = format_map_list(artifact.children);
 
         for child in &mut children {
-            child.insert(artifact.tag.clone(), artifact.data.clone());
+            // ex: ElementType not included in result
+            if let Some(data) = &artifact.data {
+                child.insert(artifact.tag.clone(), data.clone());
+            }
         }
         result.append(&mut children)
     }
 
     if leaves.len() != 0 {
-        let mut map = HashMap::new();
+        let mut map: HashMap<String, Arc<String>> = HashMap::new();
         for leaf in leaves {
-            map.insert(leaf.tag, leaf.data);
+            // ex: ElementType not included in result
+            if let Some(data) = leaf.data {
+                map.insert(leaf.tag, data);
+            }
         }
 
         result.push(map);

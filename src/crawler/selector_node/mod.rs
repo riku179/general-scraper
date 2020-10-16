@@ -73,6 +73,7 @@ pub enum SelectorType {
     Text,
     Link,
     Image,
+    Element,
 }
 
 impl SelectorType {
@@ -81,6 +82,7 @@ impl SelectorType {
             "SelectorText" => SelectorType::Text,
             "SelectorLink" => SelectorType::Link,
             "SelectorImage" => SelectorType::Image,
+            "SelectorElement" => SelectorType::Element,
             _ => panic!("unknown selector type"),
         }
     }
