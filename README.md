@@ -1,4 +1,6 @@
 # general-scraper
+![Rust](https://github.com/riku179/general-scraper/workflows/Rust/badge.svg)
+
 汎用クローラー
 
 ** **under development** **
