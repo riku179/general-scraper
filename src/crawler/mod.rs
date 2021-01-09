@@ -151,7 +151,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         node: &SelectorNode,
         doc: &String,
     ) -> Result<Vec<Artifact>> {
-        let urls: Vec<Arc<String>>;
+        let mut urls: Vec<Arc<String>>;
         // needs to drop html_doc(!Send) before async call
         {
             let html_doc = Html::parse_document(doc);
@@ -159,7 +159,10 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
             urls = html_doc
                 .select(&selector)
                 .map(|element| Arc::new(element.value().attr("href").unwrap().to_string()))
-                .collect();
+                .collect::<Vec<Arc<String>>>();
+            if !node.multiple {
+                urls.truncate(1);
+            }
         }
 
         let mut artifacts: Vec<Artifact> = vec![];
@@ -183,7 +186,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         let doc = Html::parse_document(doc);
         let selector = Selector::parse(&node.selector).unwrap();
 
-        let text: String = doc
+        let mut texts = doc
             .select(&selector)
             .map(|element| {
                 element
@@ -192,20 +195,27 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
                     .collect::<Vec<String>>()
                     .join(" ")
             })
-            .collect::<Vec<String>>()
-            .join(" ");
+            .collect::<Vec<String>>();
 
-        Ok(text)
+        if !node.multiple {
+            texts.truncate(1);
+        }
+
+        Ok(texts.join(" "))
     }
 
     fn track_image_node(node: &SelectorNode, doc: &String) -> Result<Vec<String>> {
         let doc = Html::parse_document(doc);
         let selector = Selector::parse(&node.selector).unwrap();
 
-        let image_urls = doc
+        let mut image_urls = doc
             .select(&selector)
             .map(|element| element.value().attr("src").unwrap().to_string())
             .collect::<Vec<String>>();
+
+        if !node.multiple {
+            image_urls.truncate(1);
+        }
 
         Ok(image_urls)
     }
@@ -215,7 +225,7 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
         node: &SelectorNode,
         doc: &String,
     ) -> Result<Vec<Artifact>> {
-        let selected_docs: Vec<String>;
+        let mut selected_docs: Vec<String>;
         // needs to drop html_doc(!Send) before async call
         {
             let html_doc = Html::parse_document(doc);
@@ -225,6 +235,10 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
                 .select(&selector)
                 .map(|element| element.inner_html())
                 .collect::<Vec<String>>();
+
+            if !node.multiple {
+                selected_docs.truncate(1);
+            }
         }
 
         let mut artifacts: Vec<Artifact> = Vec::with_capacity(selected_docs.len());
