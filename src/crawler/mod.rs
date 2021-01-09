@@ -117,10 +117,20 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
                         children: vec![],
                     })
                 }
+                SelectorType::Image => {
+                    let mut image_urls_artifacts = Self::track_image_node(&node, &doc)?
+                        .iter()
+                        .map(|image_url| Artifact {
+                            tag: node.id.clone(),
+                            data: Some(Arc::new(image_url.clone())),
+                            children: vec![],
+                        })
+                        .collect::<Vec<Artifact>>();
+                    artifacts.append(&mut image_urls_artifacts);
+                }
                 SelectorType::Element => {
                     artifacts.append(&mut self.track_element_node(&node, &doc).await?)
                 }
-                _ => panic!(),
             };
         }
 
@@ -186,6 +196,18 @@ impl<F: 'static + FetchClient + Send> Crawler<F> {
             .join(" ");
 
         Ok(text)
+    }
+
+    fn track_image_node(node: &SelectorNode, doc: &String) -> Result<Vec<String>> {
+        let doc = Html::parse_document(doc);
+        let selector = Selector::parse(&node.selector).unwrap();
+
+        let image_urls = doc
+            .select(&selector)
+            .map(|element| element.value().attr("src").unwrap().to_string())
+            .collect::<Vec<String>>();
+
+        Ok(image_urls)
     }
 
     async fn track_element_node(

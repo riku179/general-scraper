@@ -42,32 +42,33 @@ impl FetchClient for MockedFetcher {
 async fn fetcher_crawler_test() {
     let test_data = vec![
         (
+            "test SelectorLink",
             vec![
                 (
-                    "http://url-root.com/article".to_string(),
+                    "http://url-root.com/article".into(),
                     r###"
                     <a class="url" href="http://url-a.com">url a</a>
                     <a class="url" href="http://url-b.com">url b</a>
                 "###
-                    .to_string(),
+                    .into(),
                 ),
                 (
-                    "http://url-a.com".to_string(),
+                    "http://url-a.com".into(),
                     r###"
                     <p class="title">title A</p>
                     <p class="body">body A1</p>
                     <p class="body">body A2</p>
                 "###
-                    .to_string(),
+                    .into(),
                 ),
                 (
-                    "http://url-b.com".to_string(),
+                    "http://url-b.com".into(),
                     r###"
                     <p class="title">title B</p>
                     <p class="body">body B1</p>
                     <p class="body">body B2</p>
                 "###
-                    .to_string(),
+                    .into(),
                 ),
             ],
             r###"
@@ -112,39 +113,39 @@ async fn fetcher_crawler_test() {
   ]
 }
     "###
-            .to_string(),
+            .into(),
             vec![Artifact {
-                tag: "source_url".to_string(),
-                data: Some(Arc::new("http://url-root.com/article".to_string())),
+                tag: "source_url".into(),
+                data: Some(Arc::new("http://url-root.com/article".into())),
                 children: vec![
                     Artifact {
-                        tag: "link".to_string(),
-                        data: Some(Arc::new("http://url-a.com".to_string())),
+                        tag: "link".into(),
+                        data: Some(Arc::new("http://url-a.com".into())),
                         children: vec![
                             Artifact {
-                                tag: "title".to_string(),
-                                data: Some(Arc::new("title A".to_string())),
+                                tag: "title".into(),
+                                data: Some(Arc::new("title A".into())),
                                 children: vec![],
                             },
                             Artifact {
-                                tag: "body".to_string(),
-                                data: Some(Arc::new("body A1 body A2".to_string())),
+                                tag: "body".into(),
+                                data: Some(Arc::new("body A1 body A2".into())),
                                 children: vec![],
                             },
                         ],
                     },
                     Artifact {
-                        tag: "link".to_string(),
-                        data: Some(Arc::new("http://url-b.com".to_string())),
+                        tag: "link".into(),
+                        data: Some(Arc::new("http://url-b.com".into())),
                         children: vec![
                             Artifact {
-                                tag: "title".to_string(),
-                                data: Some(Arc::new("title B".to_string())),
+                                tag: "title".into(),
+                                data: Some(Arc::new("title B".into())),
                                 children: vec![],
                             },
                             Artifact {
-                                tag: "body".to_string(),
-                                data: Some(Arc::new("body B1 body B2".to_string())),
+                                tag: "body".into(),
+                                data: Some(Arc::new("body B1 body B2".into())),
                                 children: vec![],
                             },
                         ],
@@ -153,8 +154,9 @@ async fn fetcher_crawler_test() {
             }],
         ),
         (
+            "test SelectorElement",
             vec![(
-                "http://url-root.com/article".to_string(),
+                "http://url-root.com/article".into(),
                 r###"
                     <div class="contents">
                         <p class="title">title a</p>
@@ -169,7 +171,7 @@ async fn fetcher_crawler_test() {
                         <p class="body">body c</p>
                     </div>
                 "###
-                .to_string(),
+                .into(),
             )],
             r###"
 {
@@ -213,55 +215,55 @@ async fn fetcher_crawler_test() {
   ]
 }
     "###
-            .to_string(),
+            .into(),
             vec![Artifact {
-                tag: "source_url".to_string(),
-                data: Some(Arc::new("http://url-root.com/article".to_string())),
+                tag: "source_url".into(),
+                data: Some(Arc::new("http://url-root.com/article".into())),
                 children: vec![
                     Artifact {
-                        tag: "content".to_string(),
+                        tag: "content".into(),
                         data: None,
                         children: vec![
                             Artifact {
-                                tag: "title".to_string(),
-                                data: Some(Arc::new("title a".to_string())),
+                                tag: "title".into(),
+                                data: Some(Arc::new("title a".into())),
                                 children: vec![],
                             },
                             Artifact {
-                                tag: "body".to_string(),
-                                data: Some(Arc::new("body a".to_string())),
+                                tag: "body".into(),
+                                data: Some(Arc::new("body a".into())),
                                 children: vec![],
                             },
                         ],
                     },
                     Artifact {
-                        tag: "content".to_string(),
+                        tag: "content".into(),
                         data: None,
                         children: vec![
                             Artifact {
-                                tag: "title".to_string(),
-                                data: Some(Arc::new("title b".to_string())),
+                                tag: "title".into(),
+                                data: Some(Arc::new("title b".into())),
                                 children: vec![],
                             },
                             Artifact {
-                                tag: "body".to_string(),
-                                data: Some(Arc::new("body b".to_string())),
+                                tag: "body".into(),
+                                data: Some(Arc::new("body b".into())),
                                 children: vec![],
                             },
                         ],
                     },
                     Artifact {
-                        tag: "content".to_string(),
+                        tag: "content".into(),
                         data: None,
                         children: vec![
                             Artifact {
-                                tag: "title".to_string(),
-                                data: Some(Arc::new("title c".to_string())),
+                                tag: "title".into(),
+                                data: Some(Arc::new("title c".into())),
                                 children: vec![],
                             },
                             Artifact {
-                                tag: "body".to_string(),
-                                data: Some(Arc::new("body c".to_string())),
+                                tag: "body".into(),
+                                data: Some(Arc::new("body c".into())),
                                 children: vec![],
                             },
                         ],
@@ -269,14 +271,68 @@ async fn fetcher_crawler_test() {
                 ],
             }],
         ),
+        (
+            "test SelectorImage",
+            vec![(
+                "http://url-root.com/article".into(),
+                r###"
+                <img class="thumbnail" src="http://image-a.com">
+                <img class="thumbnail" src="http://image-b.com">
+                <img class="thumbnail" src="http://image-c.com">
+                "###
+                .into(),
+            )],
+            r###"
+{
+  "_id": "test",
+  "startUrl": [
+    "http://url-root.com/article"
+  ],
+  "selectors": [
+    {
+      "id": "image",
+      "type": "SelectorImage",
+      "parentSelectors": [
+        "_root"
+      ],
+      "selector": ".thumbnail",
+      "multiple": true,
+      "delay": 0
+    }
+  ]
+}
+    "###
+            .into(),
+            vec![Artifact {
+                tag: "source_url".into(),
+                data: Some(Arc::new("http://url-root.com/article".into())),
+                children: vec![
+                    Artifact {
+                        tag: "image".into(),
+                        data: Some(Arc::new("http://image-a.com".into())),
+                        children: vec![],
+                    },
+                    Artifact {
+                        tag: "image".into(),
+                        data: Some(Arc::new("http://image-b.com".into())),
+                        children: vec![],
+                    },
+                    Artifact {
+                        tag: "image".into(),
+                        data: Some(Arc::new("http://image-c.com".into())),
+                        children: vec![],
+                    },
+                ],
+            }],
+        ),
     ];
 
-    for (url_map, selector_json, expected) in test_data {
+    for (name, url_map, selector_json, expected) in test_data {
         let mocked_fetcher = MockedFetcher::new(url_map);
         let executor = Crawler::new(mocked_fetcher, vec![]);
         let selector = SelectorTree::new(selector_json).unwrap();
         let (actual, _) = executor.crawl(&selector).await.unwrap();
 
-        assert_eq!(expected, actual)
+        assert_eq!(expected, actual, "{}", name)
     }
 }

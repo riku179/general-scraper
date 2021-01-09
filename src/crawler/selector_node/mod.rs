@@ -37,7 +37,7 @@ pub struct SelectorNode {
 
 impl SelectorNode {
     fn new(mut sitemap: SiteMap) -> Vec<Self> {
-        build_selector_node(&mut sitemap.selectors, &"_root".to_string())
+        build_selector_node(&mut sitemap.selectors, &"_root".into())
     }
 
     fn from_raw(raw: &RawSelector) -> Self {

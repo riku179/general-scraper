@@ -46,29 +46,29 @@ fn test_selector_tree_new() {
     "###;
 
     let expected = vec![SelectorNode {
-        id: "link".to_string(),
+        id: "link".into(),
         selector_type: SelectorType::Link,
-        selector: ".mdlGrid__col12 a".to_string(),
+        selector: ".mdlGrid__col12 a".into(),
         multiple: true,
         children: vec![
             SelectorNode {
-                id: "title".to_string(),
+                id: "title".into(),
                 selector_type: SelectorType::Text,
-                selector: "h1.entryHeader__title".to_string(),
+                selector: "h1.entryHeader__title".into(),
                 multiple: false,
                 children: vec![],
             },
             SelectorNode {
-                id: "content".to_string(),
+                id: "content".into(),
                 selector_type: SelectorType::Text,
-                selector: ".entry > p".to_string(),
+                selector: ".entry > p".into(),
                 multiple: true,
                 children: vec![],
             },
         ],
     }];
 
-    let sitemap = SiteMap::new(testdata.to_string()).unwrap();
+    let sitemap = SiteMap::new(testdata.into()).unwrap();
     let actual = SelectorNode::new(sitemap);
 
     assert_eq!(actual, expected)
