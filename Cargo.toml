@@ -1,5 +1,5 @@
 [package]
-name = "general-scraper"
+name = "scrapper"
 version = "0.1.0"
 authors = ["Riku Inoue <gety0urpingdrum@gmail.com>"]
 edition = "2018"
@@ -7,22 +7,22 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-scraper = "0.12.0"
-reqwest = { version = "0.10", features = ["gzip", "brotli"] }
-tokio = { version = "0.2", features = ["full"] }
+scraper = "0.12"
+reqwest = { version = "0.11", features = ["gzip", "brotli"] }
+tokio = { version = "1.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = "1.0"
-async-trait = "0.1.36"
-anyhow = "1.0.31"
+async-trait = "0.1"
+anyhow = "1.0"
 chrono = { version = "0.4", features = ["serde"]}
-rayon = "1.1"
-sha-1 = "0.9.1"
+rayon = "1.5"
+sha-1 = "0.9"
 futures = "0.3"
-diesel = { version = "1.4.5", features = ["sqlite", "postgres", "chrono", "r2d2"] }
-r2d2 = "0.8.9"
-dotenv = "0.15.0"
-log = "0.4.11"
-env_logger = "0.7.1"
+diesel = { version = "1.4", features = ["sqlite", "postgres", "chrono", "r2d2"] }
+r2d2 = "0.8"
+dotenv = "0.15"
+log = "0.4"
+env_logger = "0.8"
 
 [lib]
 name = "lib"
